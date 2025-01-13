@@ -93,6 +93,31 @@ const sortedSetsByDate = sortDealsbyDate(duplicateDeals, 'published');
 // 3. Log the variable
 console.log(sortedSetsByDate);
 
+//let create only one function of sort
+function sortDealsByKey(data, key) {
+    if (key == 'price') {
+        return data.sort((a, b) => {
+            if (a[key] < b[key]) {
+                return -1;
+            }
+            if (a[key] > b[key]) {
+                return 1;
+            }
+            return 0
+        })
+    }
+    if (key == 'published') {
+        return data.sort((a, b) => {
+            let dateA = new Date(a[key]);
+            let dateB = new Date(b[key]);
+            return dateA - dateB;
+        })
+    };
+}
+const sortedDealsByPrice = sortDealsByKey(duplicateDeals, 'price');
+const sortedDealsByPercentage = sortDealsByKey(duplicateDeals, 'published');
+console.log(sortedDealsByPrice);
+console.log(sortedDealsByPercentage);
 // 🎯 TODO 6: Filter a specific percentage discount range
 // 1. Filter the list of deals between 50% and 75%
 function filterByPercentage(data, key, min, max) {
