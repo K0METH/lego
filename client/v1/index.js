@@ -28,7 +28,9 @@ console.log(MY_FAVORITE_DEALERS[0]);
 // 🎯 TODO 1: The highest reduction
 // 0. I have 2 favorite lego sets shopping communities stored in MY_FAVORITE_DEALERS variable
 // 1. Create a new variable and assign it the link of the lego set with the highest reduction I can find on these 2 websites
+var best_deal = 'https://www.avenuedelabrique.com/lego-movie/70828-le-bus-discotheque/p5212';
 // 2. Log the variable
+console.log(best_deal);
 
 /**
  * 🧱
@@ -41,22 +43,55 @@ console.log(MY_FAVORITE_DEALERS[0]);
 
 // 🎯 TODO 2: Number of deals
 // 1. Create a variable and assign it the number of deals
+const numberOfDeals = deals.length;
 // 2. Log the variable
-
+console.log(numberOfDeals);
 // 🎯 TODO 3: Website name
 // 1. Create a variable and assign it the list of shopping community name only
+const listOfShopping = [new Set(deals.map(deal => deal.community))];
 // 2. Log the variable
+console.log(listOfShopping);
 // 3. Log how many shopping communities we have
+console.log(listOfShopping.length +1);
 
 // 🎯 TODO 4: Sort by price
 // 1. Create a function to sort the deals by price
-// 2. Create a variable and assign it the list of sets by price from lowest to highest
-// 3. Log the variable
+function sortDeals(data,key) {
+    return data.sort((a, b) => {
+        if (a[key] < b[key]) {
+            return -1;
+        }
+        if (a[key] > b[key]) {
+            return 1;
+        }
+        return 0
+    });
 
+}
+// 2. Create a variable and assign it the list of sets by price from lowest to highest
+const duplicateDeals = deals;
+const sortedSets = sortDeals(duplicateDeals, 'price');
+// 3. Log the variable
+console.log(sortedSets);
 // 🎯 TODO 5: Sort by date
 // 1. Create a function to sort the deals by date
+
+///This will be the same function as before,only we have to rework th date to work with
+//first, let's see what type is published, since it gave us the info about the date
+console.log(typeof deals[0]['published']);
+//we see that its a String with the same structure type for both our publishers, it makes it easy to manipulate
+function sortDealsbyDate(data, key) {
+    return data.sort((a, b) => {
+        let dateA = new Date(a[key]);
+        let dateB = new Date(b[key]);
+        return dateA - dateB;
+    });
+}
+
 // 2. Create a variable and assign it the list of deals by date from recent to old
+const sortesSetsByDate = sortDealsbyDate(duplicateDeals, 'published');
 // 3. Log the variable
+console.log(sortesSetsByDate);
 
 // 🎯 TODO 6: Filter a specific percentage discount range
 // 1. Filter the list of deals between 50% and 75%
