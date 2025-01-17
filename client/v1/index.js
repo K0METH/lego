@@ -46,6 +46,7 @@ console.log(best_deal);
 const numberOfDeals = deals.length;
 // 2. Log the variable
 console.log(numberOfDeals);
+
 // 🎯 TODO 3: Website name
 // 1. Create a variable and assign it the list of shopping community name only
 const listOfShopping = [new Set(deals.map(deal => deal.community))];
@@ -132,7 +133,13 @@ console.log(filteredListByPercentage);
 
 // 🎯 TODO 7: Average percentage discount
 // 1. Determine the average percentage discount of the deals
+let average = 0
+deals.forEach((deal) => {
+    average += deal['discount'];
+})
 // 2. Log the average
+average /= deals.length;
+console.log(average);
 
 /**
  * 🏎
