@@ -178,8 +178,15 @@ for (let community in communities) {
 
 // 🎯 TODO 9: Sort by price for each community
 // 1. For each community, sort the deals by discount price, from highest to lowest
-// 2. Log the sort
+const duplicateCommunities = Object.entries(communities).map(([community, deals]) => {
+    return {
+        community, // Le nom de la communauté
+        deals: [...deals].sort((a, b) => b.discount - a.discount) // Copie des deals et tri
+    };
+});
 
+// Log du résultat
+console.log(duplicateCommunities);
 // 🎯 TODO 10: Sort by date for each community
 // 1. For each set, sort the deals by date, from old to recent
 // 2. Log the sort
