@@ -29,7 +29,7 @@ let currentPagination = {};
 const selectShow = document.querySelector('#show-select');
 const selectPage = document.querySelector('#page-select');
 const selectLegoSetIds = document.querySelector('#lego-set-id-select');
-const sectionDeals = document.querySelector('#deals');
+const sectionDeals= document.querySelector('#deals');
 const spanNbDeals = document.querySelector('#nbDeals');
 
 /**
@@ -37,109 +37,104 @@ const spanNbDeals = document.querySelector('#nbDeals');
  * @param {Array} result - deals to display
  * @param {Object} meta - pagination meta info
  */
-const setCurrentDeals = ({ result, meta }) => {
-    currentDeals = result;
-    currentPagination = meta;
+const setCurrentDeals = ({result, meta}) => {
+  currentDeals = result;
+  currentPagination = meta;
 };
 
 /**
  * Fetch deals from api
  * @param  {Number}  [page=1] - current page to fetch
- * @param  {Number}  [size=6] - size of the page
+ * @param  {Number}  [size=12] - size of the page
  * @return {Object}
  */
 const fetchDeals = async (page = 1, size = 6) => {
-    try {
-        const response = await fetch(
-            `https://lego-api-blue.vercel.app/deals?page=${page}&size=${size}`
-        );
-        const body = await response.json();
+  try {
+    const response = await fetch(
+      `https://lego-api-blue.vercel.app/deals?page=${page}&size=${size}`
+    );
+    const body = await response.json();
 
-        if (body.success !== true) {
-            console.error(body);
-            return { currentDeals, currentPagination };
-        }
-
-        return body.data;
-    } catch (error) {
-        console.error(error);
-        return { currentDeals, currentPagination };
+    if (body.success !== true) {
+      console.error(body);
+      return {currentDeals, currentPagination};
     }
+
+    return body.data;
+  } catch (error) {
+    console.error(error);
+    return {currentDeals, currentPagination};
+  }
 };
 
 /**
  * Render list of deals
  * @param  {Array} deals
  */
-const renderDeals = (deals) => {
-    const fragment = document.createDocumentFragment();
-    const div = document.createElement('div');
-    const template = deals
-        .map((deal) => {
-            return `
+const renderDeals = deals => {
+  const fragment = document.createDocumentFragment();
+  const div = document.createElement('div');
+  const template = deals
+    .map(deal => {
+      return `
       <div class="deal" id=${deal.uuid}>
         <span>${deal.id}</span>
         <a href="${deal.link}">${deal.title}</a>
         <span>${deal.price}</span>
       </div>
     `;
-        })
-        .join('');
+    })
+    .join('');
 
-    div.innerHTML = template;
-    fragment.appendChild(div);
-    sectionDeals.innerHTML = '<h2>Deals</h2>';
-    sectionDeals.appendChild(fragment);
+  div.innerHTML = template;
+  fragment.appendChild(div);
+  sectionDeals.innerHTML = '<h2>Deals</h2>';
+  sectionDeals.appendChild(fragment);
 };
 
 /**
  * Render page selector
  * @param  {Object} pagination
  */
-const renderPagination = (pagination) => {
-    const { currentPage, pageCount } = pagination;
-    const options = Array.from(
-        { length: pageCount },
-        (value, index) => `<option value="${index + 1}">${index + 1}</option>`
-    ).join('');
+const renderPagination = pagination => {
+  const {currentPage, pageCount} = pagination;
+  const options = Array.from(
+    {'length': pageCount},
+    (value, index) => `<option value="${index + 1}">${index + 1}</option>`
+  ).join('');
 
-    selectPage.innerHTML = options;
-    selectPage.selectedIndex = currentPage - 1;
+  selectPage.innerHTML = options;
+  selectPage.selectedIndex = currentPage - 1;
 };
 
 /**
  * Render lego set ids selector
  * @param  {Array} lego set ids
  */
-const renderLegoSetIds = (deals) => {
-    const ids = getIdsFromDeals(deals);
-    const options = ids
-        .map((id) => `<option value="${id}">${id}</option>`)
-        .join('');
+const renderLegoSetIds = deals => {
+  const ids = getIdsFromDeals(deals);
+  const options = ids.map(id => 
+    `<option value="${id}">${id}</option>`
+  ).join('');
 
-    selectLegoSetIds.innerHTML = options;
+  selectLegoSetIds.innerHTML = options;
 };
 
 /**
- * Render indicators
+ * Render page selector
  * @param  {Object} pagination
  */
-const renderIndicators = (pagination) => {
-    const { count } = pagination;
+const renderIndicators = pagination => {
+  const {count} = pagination;
 
-    spanNbDeals.innerHTML = count;
+  spanNbDeals.innerHTML = count;
 };
 
-/**
- * Render the full page
- * @param  {Array} deals
- * @param  {Object} pagination
- */
 const render = (deals, pagination) => {
-    renderDeals(deals);
-    renderPagination(pagination);
-    renderIndicators(pagination);
-    renderLegoSetIds(deals);
+  renderDeals(deals);
+  renderPagination(pagination);
+  renderIndicators(pagination);
+  renderLegoSetIds(deals)
 };
 
 /**
@@ -150,39 +145,15 @@ const render = (deals, pagination) => {
  * Select the number of deals to display
  */
 selectShow.addEventListener('change', async (event) => {
-    const size = parseInt(event.target.value); // Get the selected size
-    const deals = await fetchDeals(currentPagination.currentPage, size); // Fetch new deals
+  const deals = await fetchDeals(currentPagination.currentPage, parseInt(event.target.value));
 
-    setCurrentDeals(deals); // Update global state
-    render(currentDeals, currentPagination); // Re-render the page with new size
+  setCurrentDeals(deals);
+  render(currentDeals, currentPagination);
 });
 
-/**
- * Select a new page
- */
-selectPage.addEventListener('change', async (event) => {
-    const page = parseInt(event.target.value); // Get the selected page
-    const deals = await fetchDeals(page, currentPagination.pageSize); // Fetch new deals for selected page
-
-    setCurrentDeals(deals); // Update global state
-    render(currentDeals, currentPagination); // Re-render the page
-});
-
-/**
- * Initial fetch and render
- */
 document.addEventListener('DOMContentLoaded', async () => {
-    const deals = await fetchDeals(); // Initial fetch with default size (6)
+  const deals = await fetchDeals();
 
-    setCurrentDeals(deals); // Set initial deals and pagination
-    render(currentDeals, currentPagination); // Render the initial page
+  setCurrentDeals(deals);
+  render(currentDeals, currentPagination);
 });
-
-/**
- * Utility function to extract unique lego set ids from deals
- * @param {Array} deals
- * @return {Array}
- */
-const getIdsFromDeals = (deals) => {
-    return [...new Set(deals.map((deal) => deal.id))];
-};
