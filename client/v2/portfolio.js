@@ -31,6 +31,7 @@ const selectPage = document.querySelector('#page-select');
 const selectLegoSetIds = document.querySelector('#lego-set-id-select');
 const sectionDeals= document.querySelector('#deals');
 const spanNbDeals = document.querySelector('#nbDeals');
+const selectSort = document.querySelector('#sort-select');
 
 /**
  * Set global value
@@ -48,23 +49,23 @@ const setCurrentDeals = ({result, meta}) => {
  * @param  {Number}  [size=12] - size of the page
  * @return {Object}
  */
-const fetchDeals = async (page = 1, size = 6) => {
-  try {
-    const response = await fetch(
-      `https://lego-api-blue.vercel.app/deals?page=${page}&size=${size}`
-    );
-    const body = await response.json();
+const fetchDeals = async (page = 1, size = 6, sort = '') => {
+    try {
+        const response = await fetch(
+            `https://lego-api-blue.vercel.app/deals?page=${page}&size=${size}${sort ? `&sort=${sort}` : ''}`
+        );
+        const body = await response.json();
 
-    if (body.success !== true) {
-      console.error(body);
-      return {currentDeals, currentPagination};
+        if (body.success !== true) {
+            console.error(body);
+            return { currentDeals, currentPagination };
+        }
+
+        return body.data;
+    } catch (error) {
+        console.error(error);
+        return { currentDeals, currentPagination };
     }
-
-    return body.data;
-  } catch (error) {
-    console.error(error);
-    return {currentDeals, currentPagination};
-  }
 };
 
 /**
@@ -145,15 +146,29 @@ const render = (deals, pagination) => {
  * Select the number of deals to display
  */
 selectShow.addEventListener('change', async (event) => {
-  const deals = await fetchDeals(currentPagination.currentPage, parseInt(event.target.value));
+    const deals = await fetchDeals(
+        currentPagination.currentPage,
+        parseInt(event.target.value),
+        selectSort.value
+    );
 
-  setCurrentDeals(deals);
-  render(currentDeals, currentPagination);
+    setCurrentDeals(deals);
+    render(currentDeals, currentPagination);
+});
+document.addEventListener('DOMContentLoaded', async () => {
+    const deals = await fetchDeals(1, 6, selectSort.value);
+
+    setCurrentDeals(deals);
+    render(currentDeals, currentPagination);
 });
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const deals = await fetchDeals();
+selectSort.addEventListener('change', async (event) => {
+    const deals = await fetchDeals(
+        currentPagination.currentPage,
+        parseInt(selectShow.value),
+        event.target.value
+    );
 
-  setCurrentDeals(deals);
-  render(currentDeals, currentPagination);
+    setCurrentDeals(deals);
+    render(currentDeals, currentPagination);
 });
