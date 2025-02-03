@@ -76,11 +76,15 @@ const fetchDeals = async (page = 1, size = 6, sort = '', filter = '') => {
                 return b.comments - a.comments;
             });
         }
-
-        console.log('After sorting:', body.data.result);
+        else if (filter === 'hot') {
+            body.data.result.sort((a, b) => {
+                const hotScoreA = (a.discount * 0.7) + (a.comments * 0.3);
+                const hotScoreB = (b.discount * 0.7) + (b.comments * 0.3);
+                return hotScoreB - hotScoreA;
+            });
+        }
         return body.data;
     } catch (error) {
-        console.error(error);
         return { currentDeals, currentPagination };
     }
 };
