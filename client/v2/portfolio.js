@@ -156,10 +156,10 @@ selectShow.addEventListener('change', async (event) => {
     render(currentDeals, currentPagination);
 });
 document.addEventListener('DOMContentLoaded', async () => {
-    const deals = await fetchDeals(1, 6, selectSort.value);
+  const deals = await fetchDeals(1, 6, selectSort.value);
 
-    setCurrentDeals(deals);
-    render(currentDeals, currentPagination);
+  setCurrentDeals(deals);
+  render(currentDeals, currentPagination);
 });
 
 selectSort.addEventListener('change', async (event) => {
@@ -167,6 +167,17 @@ selectSort.addEventListener('change', async (event) => {
         currentPagination.currentPage,
         parseInt(selectShow.value),
         event.target.value
+    );
+
+    setCurrentDeals(deals);
+    render(currentDeals, currentPagination);
+});
+
+selectPage.addEventListener('change', async (event) => {
+    const deals = await fetchDeals(
+        parseInt(event.target.value), // nouvelle page sélectionnée
+        parseInt(selectShow.value),   // taille actuelle
+        selectSort.value             // tri actuel
     );
 
     setCurrentDeals(deals);
