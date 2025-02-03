@@ -54,20 +54,22 @@ const setCurrentDeals = ({result, meta}) => {
 const fetchDeals = async (page = 1, size = 6, sort = '', filter = '') => {
     try {
         const url = `https://lego-api-blue.vercel.app/deals?page=${page}&size=${size}${sort ? `&sort=${sort}` : ''}${filter ? `&filter=${filter}` : ''}`;
-        console.log('URL called:', url);
-
         const response = await fetch(url);
         const body = await response.json();
-
+        console.log('Prix type:', typeof body.data.result[0].price);
         if (body.success !== true) {
-            console.error(body);
             return { currentDeals, currentPagination };
         }
+        //sorters
 
-        console.log('Filter applied:', filter);
-        console.log('Before sorting:', body.data.result);
+        //sorters
+        if (sort === 'price-asc') {
+            body.data.result.sort((a, b) => a.price - b.price);
+        } else if (sort === 'price-desc') {
+            body.data.result.sort((a, b) => b.price - a.price);
+        }
 
-        // Si un filtre "discount" est demandé, on trie par discount décroissant
+        //filters
         if (filter === 'discount') {
             body.data.result.sort((a, b) => b.discount - a.discount);
         }
@@ -83,6 +85,8 @@ const fetchDeals = async (page = 1, size = 6, sort = '', filter = '') => {
                 return hotScoreB - hotScoreA;
             });
         }
+
+        
         return body.data;
     } catch (error) {
         return { currentDeals, currentPagination };
@@ -207,6 +211,18 @@ selectPage.addEventListener('change', async (event) => {
         parseInt(event.target.value),
         parseInt(selectShow.value),
         selectSort.value,
+        selectFilter.value
+    );
+
+    setCurrentDeals(deals);
+    render(currentDeals, currentPagination);
+});
+
+selectSort.addEventListener('change', async (event) => {
+    const deals = await fetchDeals(
+        currentPagination.currentPage,
+        parseInt(selectShow.value),
+        event.target.value,
         selectFilter.value
     );
 
