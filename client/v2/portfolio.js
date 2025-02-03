@@ -54,6 +54,8 @@ const setCurrentDeals = ({result, meta}) => {
 const fetchDeals = async (page = 1, size = 6, sort = '', filter = '') => {
     try {
         const url = `https://lego-api-blue.vercel.app/deals?page=${page}&size=${size}${sort ? `&sort=${sort}` : ''}${filter ? `&filter=${filter}` : ''}`;
+        console.log('URL called:', url);
+
         const response = await fetch(url);
         const body = await response.json();
 
@@ -62,11 +64,20 @@ const fetchDeals = async (page = 1, size = 6, sort = '', filter = '') => {
             return { currentDeals, currentPagination };
         }
 
+        console.log('Filter applied:', filter);
+        console.log('Before sorting:', body.data.result);
+
         // Si un filtre "discount" est demandé, on trie par discount décroissant
         if (filter === 'discount') {
             body.data.result.sort((a, b) => b.discount - a.discount);
         }
+        else if (filter === 'comments') {
+            body.data.result.sort((a, b) => {
+                return b.comments - a.comments;
+            });
+        }
 
+        console.log('After sorting:', body.data.result);
         return body.data;
     } catch (error) {
         console.error(error);
@@ -176,8 +187,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 selectFilter.addEventListener('change', async (event) => {
-    console.log('Applying filter:', event.target.value);
-
     const deals = await fetchDeals(
         currentPagination.currentPage,
         parseInt(selectShow.value),
@@ -185,36 +194,16 @@ selectFilter.addEventListener('change', async (event) => {
         event.target.value
     );
 
-    // Vérifions les deals avant et après setCurrentDeals
-    console.log('Deals before update:', deals);
-    setCurrentDeals(deals);
-    console.log('Current deals after update:', currentDeals);
-
-    render(currentDeals, currentPagination);
-});
-
-selectFilter.addEventListener('change', async (event) => {
-    console.log('Filter selected:', event.target.value);  // Vérifier la valeur sélectionnée
-
-    const deals = await fetchDeals(
-        currentPagination.currentPage,
-        parseInt(selectShow.value),
-        selectSort.value,
-        event.target.value
-    );
-
-    console.log('Deals returned:', deals);  // Vérifier la réponse de l'API
     setCurrentDeals(deals);
     render(currentDeals, currentPagination);
 });
 
-// Nouvel écouteur pour le filtre
-selectFilter.addEventListener('change', async (event) => {
+selectPage.addEventListener('change', async (event) => {
     const deals = await fetchDeals(
-        currentPagination.currentPage,
+        parseInt(event.target.value),
         parseInt(selectShow.value),
         selectSort.value,
-        event.target.value
+        selectFilter.value
     );
 
     setCurrentDeals(deals);
