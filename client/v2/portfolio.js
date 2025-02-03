@@ -32,7 +32,7 @@ const selectLegoSetIds = document.querySelector('#lego-set-id-select');
 const sectionDeals= document.querySelector('#deals');
 const spanNbDeals = document.querySelector('#nbDeals');
 const selectSort = document.querySelector('#sort-select');
-
+const selectFilter = document.querySelector('#filter-select'); 
 /**
  * Set global value
  * @param {Array} result - deals to display
@@ -47,18 +47,24 @@ const setCurrentDeals = ({result, meta}) => {
  * Fetch deals from api
  * @param  {Number}  [page=1] - current page to fetch
  * @param  {Number}  [size=12] - size of the page
+ * @param  {String}  [sort=''] - sort parameter
+ * @param  {String}  [filter=''] - filter parameter
  * @return {Object}
  */
-const fetchDeals = async (page = 1, size = 6, sort = '') => {
+const fetchDeals = async (page = 1, size = 6, sort = '', filter = '') => {
     try {
-        const response = await fetch(
-            `https://lego-api-blue.vercel.app/deals?page=${page}&size=${size}${sort ? `&sort=${sort}` : ''}`
-        );
+        const url = `https://lego-api-blue.vercel.app/deals?page=${page}&size=${size}${sort ? `&sort=${sort}` : ''}${filter ? `&filter=${filter}` : ''}`;
+        const response = await fetch(url);
         const body = await response.json();
 
         if (body.success !== true) {
             console.error(body);
             return { currentDeals, currentPagination };
+        }
+
+        // Si un filtre "discount" est demandé, on trie par discount décroissant
+        if (filter === 'discount') {
+            body.data.result.sort((a, b) => b.discount - a.discount);
         }
 
         return body.data;
@@ -149,35 +155,66 @@ selectShow.addEventListener('change', async (event) => {
     const deals = await fetchDeals(
         currentPagination.currentPage,
         parseInt(event.target.value),
-        selectSort.value
+        selectSort.value,
+        selectFilter.value              // Ajout du filtre
     );
 
     setCurrentDeals(deals);
     render(currentDeals, currentPagination);
 });
-document.addEventListener('DOMContentLoaded', async () => {
-  const deals = await fetchDeals(1, 6, selectSort.value);
 
-  setCurrentDeals(deals);
-  render(currentDeals, currentPagination);
+document.addEventListener('DOMContentLoaded', async () => {
+    const deals = await fetchDeals(
+        1,
+        6,
+        selectSort.value,
+        selectFilter.value              // Ajout du filtre
+    );
+
+    setCurrentDeals(deals);
+    render(currentDeals, currentPagination);
 });
 
-selectSort.addEventListener('change', async (event) => {
+selectFilter.addEventListener('change', async (event) => {
+    console.log('Applying filter:', event.target.value);
+
     const deals = await fetchDeals(
         currentPagination.currentPage,
         parseInt(selectShow.value),
+        selectSort.value,
         event.target.value
     );
 
+    // Vérifions les deals avant et après setCurrentDeals
+    console.log('Deals before update:', deals);
+    setCurrentDeals(deals);
+    console.log('Current deals after update:', currentDeals);
+
+    render(currentDeals, currentPagination);
+});
+
+selectFilter.addEventListener('change', async (event) => {
+    console.log('Filter selected:', event.target.value);  // Vérifier la valeur sélectionnée
+
+    const deals = await fetchDeals(
+        currentPagination.currentPage,
+        parseInt(selectShow.value),
+        selectSort.value,
+        event.target.value
+    );
+
+    console.log('Deals returned:', deals);  // Vérifier la réponse de l'API
     setCurrentDeals(deals);
     render(currentDeals, currentPagination);
 });
 
-selectPage.addEventListener('change', async (event) => {
+// Nouvel écouteur pour le filtre
+selectFilter.addEventListener('change', async (event) => {
     const deals = await fetchDeals(
-        parseInt(event.target.value), // nouvelle page sélectionnée
-        parseInt(selectShow.value),   // taille actuelle
-        selectSort.value             // tri actuel
+        currentPagination.currentPage,
+        parseInt(selectShow.value),
+        selectSort.value,
+        event.target.value
     );
 
     setCurrentDeals(deals);
