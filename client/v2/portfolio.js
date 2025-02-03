@@ -56,17 +56,22 @@ const fetchDeals = async (page = 1, size = 6, sort = '', filter = '') => {
         const url = `https://lego-api-blue.vercel.app/deals?page=${page}&size=${size}${sort ? `&sort=${sort}` : ''}${filter ? `&filter=${filter}` : ''}`;
         const response = await fetch(url);
         const body = await response.json();
-        console.log('Prix type:', typeof body.data.result[0].price);
+        console.log('Un deal:', body.data.result[0]);
         if (body.success !== true) {
             return { currentDeals, currentPagination };
         }
         //sorters
 
         //sorters
+        // APRÈS - Logique de tri corrigée
         if (sort === 'price-asc') {
             body.data.result.sort((a, b) => a.price - b.price);
         } else if (sort === 'price-desc') {
             body.data.result.sort((a, b) => b.price - a.price);
+        } else if (sort === 'date-asc') {
+            body.data.result.sort((a, b) => a.published - b.published);
+        } else if (sort === 'date-desc') {
+            body.data.result.sort((a, b) => b.published - a.published);
         }
 
         //filters
