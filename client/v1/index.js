@@ -494,10 +494,34 @@ const VINTED = [
  */
 
 // 🎯 TODO 11: Compute the average, the p5 and the p25 price value
+const prices = VINTED.map((item) => parseFloat(item.price));
+prices.sort((a, b) => a - b);
+const total = prices.reduce((acc, price) => acc + price, 0);
+const itemCount = VINTED.length;
+function computePercentile(data, percentile) {
+  const index = (percentile / 100) * (data.length + 1) - 1; // Compute the index (0-based)
+
+  if (index % 1 === 0) {
+    return data[index]; // If index is an integer, return the value at that index
+  } else {
+    const lowerIndex = Math.floor(index);
+    const upperIndex = Math.ceil(index);
+    const interpolation = index - lowerIndex;
+    return (
+      data[lowerIndex] + interpolation * (data[upperIndex] - data[lowerIndex])
+    );
+  }
+}
 // 1. Compute the average price value of the listing
+const averagePrice = total / itemCount;
 // 2. Compute the p5 price value of the listing
+const p5 = computePercentile(prices, 5);
 // 3. Compute the p25 price value of the listing
+const p25 = computePercentile(prices, 25);
 // The p25 value (25th percentile) is the lower value expected to be exceeded in 25% of the vinted items
+console.log(averagePrice);
+console.log(p5);
+console.log(p25);
 
 // 🎯 TODO 12: Very old listed items
 // // 1. Log if we have very old items (true or false)
