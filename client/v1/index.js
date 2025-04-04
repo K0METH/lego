@@ -524,7 +524,26 @@ console.log(p5);
 console.log(p25);
 
 // 🎯 TODO 12: Very old listed items
+let trueCount = 0;
+let falseCount = 0;
+function checkIfVeryOld(item) {
+  const publishedDate = new Date(item.published);
+  const currentDate = new Date();
+  const threeWeeksAgo = currentDate.setDate(currentDate.getDate() - 21); // 21 days = 3 weeks
+
+  return publishedDate < threeWeeksAgo;
+}
+VINTED.forEach((item) => {
+  const isVeryOld = checkIfVeryOld(item);
+  if (isVeryOld) {
+    trueCount++;
+  } else {
+    falseCount++;
+  }
+});
 // // 1. Log if we have very old items (true or false)
+console.log(`Number of very old items (true): ${trueCount}`);
+console.log(`Number of not very old items (false): ${falseCount}`);
 // // A very old item is an item `published` more than 3 weeks ago.
 
 // 🎯 TODO 13: Find a specific item
