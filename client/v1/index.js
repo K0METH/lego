@@ -137,7 +137,13 @@ console.log(filteredListByPercentage);
 
 // 🎯 TODO 7: Average percentage discount
 // 1. Determine the average percentage discount of the deals
+let average = 0;
+deals.forEach((deal) => {
+  average += deal["discount"];
+});
 // 2. Log the average
+average /= deals.length;
+console.log(average);
 
 /**
  * 🏎
