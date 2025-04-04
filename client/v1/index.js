@@ -154,6 +154,14 @@ console.log(average);
 
 // 🎯 TODO 8: Deals by community
 // 1. Create an object called `communities` to manipulate deals by community name
+const communities = deals.reduce((acc, deal) => {
+  const communityName = deal.community;
+  if (!acc[communityName]) {
+    acc[communityName] = [];
+  }
+  acc[communityName].push(deal);
+  return acc;
+}, {});
 // The key is the community name
 // The value is the array of deals for this specific community
 //
@@ -166,7 +174,11 @@ console.log(average);
 // };
 //
 // 2. Log the variable
+console.log(communities);
 // 3. Log the number of deals by community
+for (let community in communities) {
+  console.log(`${community}: ${communities[community].length} deals`);
+}
 
 // 🎯 TODO 9: Sort by price for each community
 // 1. For each community, sort the deals by discount price, from highest to lowest
