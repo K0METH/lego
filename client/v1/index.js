@@ -560,7 +560,7 @@ const updatedVINTED = VINTED.filter((item) => item !== itemWithUuid);
 // 2. Log the new list of items
 console.log(updatedVINTED);
 
-// 🎯 TODO 5: Save a favorite item
+// 🎯 TODO 15: Save a favorite item
 // We declare and assign a variable called `sealedCamera`
 let sealedCamera = {
   link: "https://www.vinted.fr/items/5563396347-lego-43230-omaggio-a-walter-disney-misb",
@@ -577,8 +577,10 @@ let camera = sealedCamera;
 camera.favorite = true;
 
 // 1. Log `sealedCamera` and `camera` variables
+console.log(sealedCamera);
+console.log(camera);
 // 2. What do you notice?
-
+//For the moment, they are the same, because sealed is a let and not an const
 // we make (again) a new assignment again
 sealedCamera = {
   link: "https://www.vinted.fr/items/5563396347-lego-43230-omaggio-a-walter-disney-misb",
@@ -589,6 +591,10 @@ sealedCamera = {
 };
 
 // 3. Update `camera` property with `favorite` to true WITHOUT changing sealedCamera properties
+camera = { ...sealedCamera };
+camera.favorite = true;
+console.log(camera);
+console.log(sealedCamera);
 
 // 🎯 TODO 11: Compute the profitability
 // From a specific deal called `deal`
