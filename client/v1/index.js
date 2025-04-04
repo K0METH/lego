@@ -120,7 +120,20 @@ console.log(sortedDealsByPercentage);
 
 // 🎯 TODO 6: Filter a specific percentage discount range
 // 1. Filter the list of deals between 50% and 75%
+function filterByPercentage(data, key, min, max) {
+  return data.filter((dict) => {
+    let value = dict[key];
+    return value >= min && value <= max;
+  });
+}
+const filteredListByPercentage = filterByPercentage(
+  duplicateDeals,
+  "discount",
+  50,
+  75
+);
 // 2. Log the list
+console.log(filteredListByPercentage);
 
 // 🎯 TODO 7: Average percentage discount
 // 1. Determine the average percentage discount of the deals
