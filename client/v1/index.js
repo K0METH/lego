@@ -58,8 +58,22 @@ console.log(listOfShopping.length + 1);
 
 // 🎯 TODO 4: Sort by price
 // 1. Create a function to sort the deals by price
+function sortDeals(data, key) {
+  return data.sort((a, b) => {
+    if (a[key] < b[key]) {
+      return -1;
+    }
+    if (a[key] > b[key]) {
+      return 1;
+    }
+    return 0;
+  });
+}
 // 2. Create a variable and assign it the list of sets by price from lowest to highest
+const duplicateDeals = deals;
+const sortedSets = sortDeals(duplicateDeals, "price");
 // 3. Log the variable
+console.log(sortedSets);
 
 // 🎯 TODO 5: Sort by date
 // 1. Create a function to sort the deals by date
