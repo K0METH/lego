@@ -606,7 +606,18 @@ const deal = {
 };
 
 // 1. Compute the potential highest profitability based on the VINTED items
+function computeProfitability(item) {
+  return item.retail - item.price;
+}
+let highestProfitability = 0;
+VINTED.forEach((item) => {
+  const profitability = computeProfitability(deal);
+  if (profitability > highestProfitability) {
+    highestProfitability = profitability;
+  }
+});
 // 2. Log the value
+console.log(highestProfitability);
 
 /**
  * 🎬
