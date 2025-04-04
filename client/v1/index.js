@@ -195,7 +195,16 @@ console.log(duplicateCommunities);
 
 // 🎯 TODO 10: Sort by date for each community
 // 1. For each set, sort the deals by date, from old to recent
+const sortedByDateCommunities = Object.entries(communities).map(
+  ([community, deals]) => {
+    return {
+      community, // Le nom de la communauté
+      deals: [...deals].sort((a, b) => new Date(a.date) - new Date(b.date)), // Tri des deals par date
+    };
+  }
+);
 // 2. Log the sort
+console.log(sortedByDateCommunities);
 
 /**
  * 🧥
