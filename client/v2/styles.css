@@ -1,0 +1,139 @@
+:root {
+  --primary-color: #006db7;
+  --secondary-color: #ffcf00;
+  --background-color: #f5f5f5;
+  --text-color: #333;
+  --border-radius: 8px;
+  --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  margin: 0;
+  padding: 20px;
+}
+
+h1, h2, h3 {
+  color: var(--primary-color);
+}
+
+/* Options section */
+#options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+  background: white;
+  padding: 20px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+}
+
+/* Deals section */
+#deals {
+  display: grid;
+  gap: 20px;
+}
+
+.deal {
+  background: white;
+  padding: 15px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 15px;
+  transition: transform 0.2s;
+}
+
+.deal:hover {
+  transform: translateY(-2px);
+}
+
+.deal a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.deal a:hover {
+  text-decoration: underline;
+}
+
+.favorite-btn {
+  background: none;
+  border: none;
+  color: var(--secondary-color);
+  font-size: 1.5em;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.favorite-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Sales section */
+#sales {
+  background: white;
+  padding: 20px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  margin-top: 30px;
+}
+
+.sale {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 15px;
+  align-items: center;
+}
+
+.sale:last-child {
+  border-bottom: none;
+}
+
+/* Indicators section */
+#indicators {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 30px;
+}
+
+#indicators > div {
+  background: white;
+  padding: 15px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+#indicators span:first-child {
+  font-size: 0.9em;
+  color: #666;
+}
+
+#indicators span:last-child {
+  font-size: 1.5em;
+  color: var(--primary-color);
+  font-weight: bold;
+  margin-top: 5px;
+}
