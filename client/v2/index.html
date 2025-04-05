@@ -26,6 +26,7 @@
             <option value="best-discount">By best discount (>50%)</option>
             <option value="most-commented">By most commented (>15)</option>
             <option value="hot-deals">By hottest (>100°)</option>
+            <option value="favorites">Favorites only</option>
           </select>
       </div>
       <div id="sort">
@@ -74,7 +75,23 @@
       </div>
       <div>
         <span>Lifetime value</span>
-        <span>10 days</span>
+        <span id="lifetimeValue"></span>
+      </div>
+      <div>
+        <span>Average Price</span>
+        <span id="averagePrice">0</span>€
+      </div>
+      <div>
+        <span>5th percentile (P5)</span>
+        <span id="p5Price">0</span>€
+      </div>
+      <div>
+        <span>25th percentile (P25)</span>
+        <span id="p25Price">0</span>€
+      </div>
+      <div>
+        <span>Median (P50)</span>
+        <span id="p50Price">0</span>€
       </div>
     </section>
     <section id="deals"></section>

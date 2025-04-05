@@ -34,6 +34,13 @@ const spanNbDeals = document.querySelector("#nbDeals");
 const selectFilter = document.querySelector("#filter-select");
 const selectSort = document.querySelector("#sort-select");
 const salesList = document.querySelector("#sales-list");
+const spanNbSales = document.querySelector("#nbSales");
+const spanAveragePrice = document.querySelector("#averagePrice");
+const spanP5Price = document.querySelector("#p5Price");
+const spanP25Price = document.querySelector("#p25Price");
+const spanP50Price = document.querySelector("#p50Price");
+const spanLifetimeValue = document.querySelector("#lifetimeValue");
+const FAVORITES_KEY = "lego-favorites";
 
 /**
  * Set global value
@@ -99,15 +106,20 @@ const fetchSales = async (id) => {
  * @param  {Array} deals
  */
 const renderDeals = (deals) => {
+  const favorites = getFavorites();
   const fragment = document.createDocumentFragment();
   const div = document.createElement("div");
   const template = deals
     .map((deal) => {
+      const isFavorite = favorites.some((f) => f.uuid === deal.uuid);
+      const starIcon = isFavorite ? "★" : "☆";
+
       return `
       <div class="deal" id=${deal.uuid}>
         <span>${deal.id}</span>
-        <a href="${deal.link}">${deal.title}</a>
-        <span>${deal.price}</span>
+        <a href="${deal.link}" target="_blank" rel="noopener noreferrer">${deal.title}</a>
+        <span>${deal.price}€</span>
+        <button class="favorite-btn" data-uuid="${deal.uuid}">${starIcon}</button>
       </div>
     `;
     })
@@ -117,6 +129,17 @@ const renderDeals = (deals) => {
   fragment.appendChild(div);
   sectionDeals.innerHTML = "<h2>Deals</h2>";
   sectionDeals.appendChild(fragment);
+
+  // Ajouter les event listeners pour les boutons favoris
+  document.querySelectorAll(".favorite-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const uuid = e.target.dataset.uuid;
+      const deal = deals.find((d) => d.uuid === uuid);
+      if (deal) {
+        toggleFavorite(deal);
+      }
+    });
+  });
 };
 
 /**
@@ -133,17 +156,39 @@ const renderSales = (sales) => {
     .map((sale) => {
       return `
       <div class="sale">
-        <a href="${sale.link}" target="_blank">${sale.title}</a>
+        <a href="${sale.link}" target="_blank" rel="noopener noreferrer">${
+        sale.title
+      }</a>
         <span>${sale.price}€</span>
-        <span>Publié le: ${new Date(
-          sale.created_at
-        ).toLocaleDateString()}</span>
+        <span>Publié le: ${new Date(sale.published).toLocaleDateString()}</span>
       </div>
     `;
     })
     .join("");
 
   salesList.innerHTML = template;
+};
+
+/**
+ * Render indicators
+ * @param {Object} indicators
+ */
+const renderIndicatorsSales = (indicators) => {
+  const {
+    totalSales,
+    averagePrice,
+    p5Price,
+    p25Price,
+    p50Price,
+    lifetimeValue,
+  } = indicators;
+
+  spanNbSales.textContent = totalSales;
+  spanAveragePrice.textContent = averagePrice;
+  spanP5Price.textContent = p5Price;
+  spanP25Price.textContent = p25Price;
+  spanP50Price.textContent = p50Price;
+  spanLifetimeValue.textContent = `${lifetimeValue} days`;
 };
 
 /**
@@ -201,6 +246,11 @@ const filterDeals = (deals) => {
       return deals.filter((deal) => deal.comments >= 15);
     case "hot-deals":
       return deals.filter((deal) => deal.temperature >= 100);
+    case "favorites":
+      const favorites = getFavorites();
+      return deals.filter((deal) =>
+        favorites.some((f) => f.uuid === deal.uuid)
+      );
     default:
       return deals;
   }
@@ -225,6 +275,122 @@ const sortDeals = (deals) => {
     default:
       return deals;
   }
+};
+
+/**
+ * Calculate sales indicators
+ * @param {Array} sales - list of sales
+ * @returns {Object} indicators
+ */
+const calculateSalesIndicators = (sales) => {
+  if (!sales.length) {
+    return {
+      totalSales: 0,
+      averagePrice: 0,
+      p5Price: 0,
+      p25Price: 0,
+      p50Price: 0,
+      lifetimeValue: 0,
+    };
+  }
+
+  // Filtrer et convertir les prix en nombres
+  const validPrices = sales
+    .map((sale) => parseFloat(sale.price))
+    .filter((price) => !isNaN(price));
+
+  if (!validPrices.length) {
+    return {
+      totalSales: sales.length,
+      averagePrice: 0,
+      p5Price: 0,
+      p25Price: 0,
+      p50Price: 0,
+    };
+  }
+
+  // Trier les prix par ordre croissant
+  const sortedPrices = [...validPrices].sort((a, b) => a - b);
+
+  // Calculer la moyenne
+  const averagePrice =
+    sortedPrices.reduce((acc, price) => acc + price, 0) / sortedPrices.length;
+
+  // Calculer les percentiles
+  const getPercentile = (arr, p) => {
+    const index = Math.floor(arr.length * p);
+    return arr[index];
+  };
+
+  return {
+    totalSales: sales.length,
+    averagePrice: Math.round(averagePrice * 100) / 100,
+    p5Price: getPercentile(sortedPrices, 0.05),
+    p25Price: getPercentile(sortedPrices, 0.25),
+    p50Price: getPercentile(sortedPrices, 0.5),
+    lifetimeValue: calculateLifetimeValue(sales),
+  };
+};
+
+/**
+ * Calculate lifetime value in days
+ * @param {Array} sales - list of sales
+ * @returns {number} lifetime in days
+ */
+const calculateLifetimeValue = (sales) => {
+  if (!sales.length) return 0;
+
+  const dates = sales
+    .map((sale) => new Date(sale.published))
+    .filter((date) => date instanceof Date && !isNaN(date));
+
+  if (!dates.length) {
+    console.log("date : ", dates);
+    return 0;
+  }
+
+  const oldestDate = new Date(Math.min(...dates));
+  const newestDate = new Date(Math.max(...dates));
+
+  const diffTime = Math.abs(newestDate - oldestDate);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  return diffDays;
+};
+
+/**
+ * Get favorites from localStorage
+ * @returns {Array} array of favorite deals
+ */
+const getFavorites = () => {
+  const favoritesJson = localStorage.getItem(FAVORITES_KEY);
+  return favoritesJson ? JSON.parse(favoritesJson) : [];
+};
+
+/**
+ * Save favorites to localStorage
+ * @param {Array} favorites - array of favorite deals
+ */
+const saveFavorites = (favorites) => {
+  localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+};
+
+/**
+ * Toggle favorite status of a deal
+ * @param {Object} deal - deal to toggle
+ */
+const toggleFavorite = (deal) => {
+  const favorites = getFavorites();
+  const index = favorites.findIndex((f) => f.uuid === deal.uuid);
+
+  if (index === -1) {
+    favorites.push(deal);
+  } else {
+    favorites.splice(index, 1);
+  }
+
+  saveFavorites(favorites);
+  render(currentDeals, currentPagination);
 };
 
 /**
@@ -262,4 +428,6 @@ selectSort.addEventListener("change", () => {
 selectLegoSetIds.addEventListener("change", async (event) => {
   const sales = await fetchSales(event.target.value);
   renderSales(sales);
+  const indicators = calculateSalesIndicators(sales);
+  renderIndicatorsSales(indicators);
 });
