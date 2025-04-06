@@ -295,7 +295,7 @@ const calculateSalesIndicators = (sales) => {
     };
   }
 
-  // Filtrer et convertir les prix en nombres
+  //Filter and convert prices
   const validPrices = sales
     .map((sale) => parseFloat(sale.price))
     .filter((price) => !isNaN(price));
@@ -310,14 +310,11 @@ const calculateSalesIndicators = (sales) => {
     };
   }
 
-  // Trier les prix par ordre croissant
   const sortedPrices = [...validPrices].sort((a, b) => a - b);
 
-  // Calculer la moyenne
   const averagePrice =
     sortedPrices.reduce((acc, price) => acc + price, 0) / sortedPrices.length;
 
-  // Calculer les percentiles
   const getPercentile = (arr, p) => {
     const index = Math.floor(arr.length * p);
     return arr[index];
@@ -395,6 +392,76 @@ const toggleFavorite = (deal) => {
 };
 
 /**
+ * Handles the search functionality for Lego sets
+ * - Checks if the search term matches any existing deals
+ * - If found, displays the sales for that set
+ * - If not found, tries to fetch sales directly from the API
+ * - Updates the select dropdown with new IDs if needed
+ * - Handles cases where no results are found
+ */
+const handleSearch = async () => {
+  const searchInput = document.querySelector(".search-container input");
+  const searchTerm = searchInput.value.trim();
+
+  // Exit if search term is empty
+  if (!searchTerm) return;
+
+  // Try to find the set in current deals
+  const foundDeal = currentDeals.find((deal) => deal.id === searchTerm);
+
+  if (foundDeal) {
+    // If found, select it in the dropdown
+    selectLegoSetIds.value = searchTerm;
+
+    // Load corresponding sales
+    const sales = await fetchSales(searchTerm);
+    renderSales(sales);
+    const indicators = calculateSalesIndicators(sales);
+    renderIndicatorsSales(indicators);
+  } else {
+    // If not found in current deals, try fetching directly from API
+    try {
+      const sales = await fetchSales(searchTerm);
+      if (sales.length > 0) {
+        renderSales(sales);
+        const indicators = calculateSalesIndicators(sales);
+        renderIndicatorsSales(indicators);
+
+        // Update the selector with the new value
+        selectLegoSetIds.value = searchTerm;
+
+        // Add the ID to dropdown if not already present
+        if (
+          !Array.from(selectLegoSetIds.options).some(
+            (opt) => opt.value === searchTerm
+          )
+        ) {
+          const option = document.createElement("option");
+          option.value = searchTerm;
+          option.textContent = searchTerm;
+          selectLegoSetIds.appendChild(option);
+        }
+      } else {
+        // No sales found for this ID
+        salesList.innerHTML = `<p>No sales found for set ${searchTerm}</p>`;
+        // Reset indicators
+        renderIndicatorsSales({
+          totalSales: 0,
+          averagePrice: 0,
+          p5Price: 0,
+          p25Price: 0,
+          p50Price: 0,
+          lifetimeValue: 0,
+        });
+      }
+    } catch (error) {
+      console.error("Search error:", error);
+      salesList.innerHTML = `<p>Error searching for set ${searchTerm}</p>`;
+    }
+  }
+};
+
+/**
  * Declaration of all Listeners
  */
 
@@ -442,3 +509,15 @@ selectPage.addEventListener("change", async (event) => {
   setCurrentDeals(deals);
   render(currentDeals, currentPagination);
 });
+
+document
+  .querySelector(".search-container button")
+  .addEventListener("click", handleSearch);
+
+document
+  .querySelector(".search-container input")
+  .addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  });
