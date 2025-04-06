@@ -5,10 +5,8 @@ const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config();
 
 const PORT = 8092;
-const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://garanceturpin:DQljxr8TySiSzs8W@cluster0.grrmwem.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || "Lego";
+const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME;
 
 let client = null;
 let db = null;
@@ -20,12 +18,13 @@ async function connectDB() {
       client = await MongoClient.connect(MONGODB_URI, {
         useNewUrlParser: true,
       });
+      console.log("Connecting to MongoDB...");
       db = client.db(MONGODB_DB_NAME);
-      console.log("✅ Connecté à MongoDB");
+      console.log("✅ Connected to MongoDB");
     }
     return db;
   } catch (error) {
-    console.error("❌ Erreur de connexion MongoDB:", error);
+    console.error("❌ Connection error to MongoDB:", error);
     throw error;
   }
 }
@@ -38,6 +37,43 @@ app.use(helmet());
 app.options("*", cors());
 
 // Routes
+app.get("/sales/search", async (req, res) => {
+  try {
+    const db = await connectDB();
+    const { limit = 12, legoSetId, minPrice, maxPrice } = req.query;
+
+    const filter = {};
+
+    if (legoSetId) {
+      filter.legoSetId = String(legoSetId);
+    }
+
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = parseFloat(minPrice);
+      if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
+    }
+
+    const sales = await db
+      .collection("sales")
+      .find(filter)
+      .sort({ scraped: -1 })
+      .limit(parseInt(limit))
+      .toArray();
+
+    const total = await db.collection("sales").countDocuments(filter);
+
+    res.json({
+      limit: parseInt(limit),
+      total,
+      results: sales,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get("/deals/best-discounts", async (req, res) => {
   try {
     const db = await connectDB();
@@ -89,19 +125,6 @@ app.get("/deals/by-date", async (req, res) => {
       .sort({ published: -1 })
       .toArray();
     res.json(deals);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.get("/sales/:legoSetId", async (req, res) => {
-  try {
-    const db = await connectDB();
-    const sales = await db
-      .collection("sales")
-      .find({ legoSetId: req.params.legoSetId })
-      .toArray();
-    res.json(sales);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -195,36 +218,6 @@ app.get("/deals/search", async (req, res) => {
       limit: parseInt(limit),
       total,
       results: deals,
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Search sales
-app.get("/sales/search", async (req, res) => {
-  try {
-    const db = await connectDB();
-    const { limit = 12, legoSetId } = req.query;
-
-    const filter = {};
-    if (legoSetId) {
-      filter.legoSetId = legoSetId;
-    }
-
-    const sales = await db
-      .collection("sales")
-      .find(filter)
-      .sort({ published: -1 })
-      .limit(parseInt(limit))
-      .toArray();
-
-    const total = await db.collection("sales").countDocuments(filter);
-
-    res.json({
-      limit: parseInt(limit),
-      total,
-      results: sales,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
