@@ -107,6 +107,9 @@ const fetchSales = async (id) => {
  */
 const renderDeals = (deals) => {
   const favorites = getFavorites();
+
+  sectionDeals.innerHTML = "";
+
   const fragment = document.createDocumentFragment();
   const div = document.createElement("div");
   const template = deals
@@ -127,10 +130,8 @@ const renderDeals = (deals) => {
 
   div.innerHTML = template;
   fragment.appendChild(div);
-  sectionDeals.innerHTML = "<h2>Deals</h2>";
   sectionDeals.appendChild(fragment);
 
-  // Ajouter les event listeners pour les boutons favoris
   document.querySelectorAll(".favorite-btn").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       const uuid = e.target.dataset.uuid;
@@ -184,11 +185,11 @@ const renderIndicatorsSales = (indicators) => {
   } = indicators;
 
   spanNbSales.textContent = totalSales;
-  spanAveragePrice.textContent = averagePrice;
-  spanP5Price.textContent = p5Price;
-  spanP25Price.textContent = p25Price;
-  spanP50Price.textContent = p50Price;
-  spanLifetimeValue.textContent = `${lifetimeValue} days`;
+  spanAveragePrice.textContent = Math.round(averagePrice * 100) / 100;
+  spanP5Price.textContent = p5Price ? `${p5Price.toFixed(2)}€` : "0€";
+  spanP25Price.textContent = p25Price ? `${p25Price.toFixed(2)}€` : "0€";
+  spanP50Price.textContent = p50Price ? `${p50Price.toFixed(2)}€` : "0€";
+  spanLifetimeValue.textContent = `${lifetimeValue} jours`;
 };
 
 /**
@@ -430,4 +431,14 @@ selectLegoSetIds.addEventListener("change", async (event) => {
   renderSales(sales);
   const indicators = calculateSalesIndicators(sales);
   renderIndicatorsSales(indicators);
+});
+
+selectPage.addEventListener("change", async (event) => {
+  const deals = await fetchDeals(
+    parseInt(event.target.value),
+    parseInt(selectShow.value)
+  );
+
+  setCurrentDeals(deals);
+  render(currentDeals, currentPagination);
 });
