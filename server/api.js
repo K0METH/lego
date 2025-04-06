@@ -168,23 +168,6 @@ app.post("/sales", async (req, res) => {
   }
 });
 
-// Get specific deal by ID
-app.get("/deals/:id", async (req, res) => {
-  try {
-    const db = await connectDB();
-    const deal = await db.collection("deals").findOne({ _id: req.params.id });
-
-    if (!deal) {
-      return res.status(404).json({ error: "Deal not found" });
-    }
-
-    res.json(deal);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Search deals with filters
 app.get("/deals/search", async (req, res) => {
   try {
     const db = await connectDB();
@@ -195,14 +178,14 @@ app.get("/deals/search", async (req, res) => {
       filter.price = { $lte: parseFloat(price) };
     }
     if (date) {
-      filter.published = { $gte: new Date(date).getTime() / 1000 };
+      filter.published = { $gte: new Date(date) };
     }
 
     let sort = { price: 1 };
     if (filterBy === "best-discount") {
       sort = { discount: -1 };
     } else if (filterBy === "most-commented") {
-      sort = { comments: -1 };
+      sort = { commentsCount: -1 };
     }
 
     const deals = await db
@@ -212,6 +195,8 @@ app.get("/deals/search", async (req, res) => {
       .limit(parseInt(limit))
       .toArray();
 
+    console.log(`Found ${deals.length} deals`);
+
     const total = await db.collection("deals").countDocuments(filter);
 
     res.json({
@@ -219,6 +204,24 @@ app.get("/deals/search", async (req, res) => {
       total,
       results: deals,
     });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/deals/:id", async (req, res) => {
+  try {
+    const db = await connectDB();
+    const deal = await db.collection("deals").findOne({
+      _id: new ObjectId(req.params.id),
+    });
+
+    if (!deal) {
+      return res.status(404).json({ error: "Deal not found" });
+    }
+
+    res.json(deal);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
